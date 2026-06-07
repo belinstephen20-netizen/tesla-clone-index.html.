@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Tesla Motors</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--black:#000;
+  --gray-100:#f4f4f4;--gray-200:#e5e5e5;--gray-400:#aaa;--gray-600:#666;--gray-800:#333;
+  --red:#e31937;
+  --font:'Inter',sans-serif;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+body{font-family:var(--font);background:#000;color:#fff;overflow-x:hidden}
+
+/* ── LOADER ── */
+#loader{
+  position:fixed;inset:0;background:#000;z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .6s ease .2s, visibility .6s ease .2s;
+}
+#loader.hidden{opacity:0;visibility:hidden}
+.loader-logo svg{width:160px;fill:#fff;animation:logoFadeIn .8s ease forwards}
+@keyframes logoFadeIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+  transition:background .4s ease;
+}
+nav.scrolled{background:rgba(255,255,255,.97);backdrop-filter:blur(12px)}
+.nav-logo svg{width:100px;transition:fill .4s}
+nav:not(.scrolled) .nav-logo svg{fill:#fff}
+nav.scrolled .nav-logo svg{fill:#000}
+.nav-links{
+  position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;gap:2px;list-style:none;
+}
+.nav-links a{
+  font-size:14px;font-weight:500;letter-spacing:.01em;
+  text-decoration:none;padding:6px 14px;border-radius:20px;
+  transition:background .2s,color .4s;
+  color:#fff;
+}
+nav.scrolled .nav-links a{color:#000}
+.nav-links a:hover{background:rgba(255,255,255,.15)}
+nav.scrolled .nav-links a:hover{background:rgba(0,0,0,.07)}
+.nav-right{display:flex;gap:4px;align-items:center}
+.nav-right a{
+  font-size:14px;font-weight:500;padding:6px 14px;border-radius:20px;
+  color:#fff;text-decoration:none;
+  transition:background .2s,color .4s;
+}
+nav.scrolled .nav-right a{color:#000}
+.nav-right a:hover{background:rgba(255,255,255,.15)}
+nav.scrolled .nav-right a:hover{background:rgba(0,0,0,.07)}
+
+/* ── HERO SECTIONS ── */
+.hero{
+  position:relative;width:100%;height:100vh;min-height:600px;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:space-between;overflow:hidden;
+  scroll-snap-align:start;
+}
+.hero-bg{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  transform:scale(1.05);
+  transition:transform 8s var(--ease-out);
+}
+.hero.active .hero-bg{transform:scale(1)}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,transparent 40%,transparent 55%,rgba(0,0,0,.2) 100%);
+}
+.hero-top{
+  position:relative;z-index:1;text-align:center;
+  padding-top:80px;
+  opacity:0;transform:translateY(-16px);
+  transition:opacity .9s var(--ease-out) .3s, transform .9s var(--ease-out) .3s;
+}
+.hero.active .hero-top{opacity:1;transform:translateY(0)}
+.hero-top h1{font-size:clamp(36px,5.5vw,56px);font-weight:500;letter-spacing:-.02em;line-height:1.05;color:#fff}
+.hero-top .sub{font-size:14px;color:rgba(255,255,255,.85);margin-top:8px;font-weight:400}
+.hero-top .price-note{font-size:13px;color:rgba(255,255,255,.6);margin-top:4px}
+.hero-top.dark-text h1{color:#000}
+.hero-top.dark-text .sub{color:rgba(0,0,0,.7)}
+.hero-top.dark-text .price-note{color:rgba(0,0,0,.45)}
+
+.hero-stats{
+  position:relative;z-index:1;
+  display:flex;gap:56px;margin-bottom:8px;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .8s var(--ease-out) .5s, transform .8s var(--ease-out) .5s;
+}
+.hero.active .hero-stats{opacity:1;transform:translateY(0)}
+.stat{text-align:center}
+.stat-val{font-size:clamp(32px,4vw,44px);font-weight:300;color:#fff;line-height:1}
+.stat-val sup{font-size:.5em;vertical-align:super}
+.stat-unit{font-size:13px;color:rgba(255,255,255,.7);font-weight:400}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-top:4px}
+.hero-stats.dark-text .stat-val{color:#000}
+.hero-stats.dark-text .stat-unit{color:rgba(0,0,0,.6)}
+.hero-stats.dark-text .stat-label{color:rgba(0,0,0,.4)}
+
+.hero-ctas{
+  position:relative;z-index:1;
+  display:flex;gap:14px;padding-bottom:52px;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .8s var(--ease-out) .65s, transform .8s var(--ease-out) .65s;
+}
+.hero.active .hero-ctas{opacity:1;transform:translateY(0)}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:46px;padding:0 32px;border-radius:4px;border:none;
+  font-size:15px;font-weight:500;letter-spacing:.01em;
+  cursor:pointer;text-decoration:none;font-family:var(--font);
+  transition:opacity .2s,transform .15s,box-shadow .2s;
+  min-width:176px;
+}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn:active{transform:scale(.98);opacity:1}
+.btn-white{background:#fff;color:#000}
+.btn-dark-glass{background:rgba(23,26,32,.72);color:#fff;backdrop-filter:blur(8px)}
+.btn-black{background:#000;color:#fff}
+.btn-outline-white{background:rgba(255,255,255,.9);color:#000;border:1.5px solid rgba(255,255,255,.6)}
+.btn-glass-light{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);backdrop-filter:blur(8px)}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  z-index:2;display:flex;flex-direction:column;align-items:center;gap:5px;
+  opacity:0;animation:fadeInScroll 1s ease 1.2s forwards;
+  cursor:pointer;
+}
+@keyframes fadeInScroll{to{opacity:.7}}
+.scroll-hint:hover{opacity:1!important}
+.scroll-hint span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.scroll-hint.dark span{color:rgba(0,0,0,.5)}
+.scroll-chevron{width:18px;height:18px;border-right:2px solid rgba(255,255,255,.7);border-bottom:2px solid rgba(255,255,255,.7);transform:rotate(45deg);animation:bounce 1.8s ease-in-out infinite}
+.scroll-hint.dark .scroll-chevron{border-color:rgba(0,0,0,.45)}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(4px)}}
+
+/* ── ENERGY SPLIT ── */
+.energy-split{
+  display:grid;grid-template-columns:1fr 1fr;
+  scroll-snap-align:start;
+}
+.energy-panel{
+  position:relative;height:100vh;min-height:600px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  overflow:hidden;padding:80px 24px 48px;
+}
+.energy-panel-bg{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  transform:scale(1.06);
+  transition:transform 8s var(--ease-out);
+}
+.energy-panel.active .energy-panel-bg{transform:scale(1)}
+.energy-panel-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.05),transparent 45%,rgba(0,0,0,.25));
+}
+.energy-panel-info{position:relative;z-index:1;text-align:center}
+.energy-panel-info h2{font-size:clamp(28px,3.5vw,44px);font-weight:500;color:#fff;margin-bottom:6px}
+.energy-panel-info p{font-size:14px;color:rgba(255,255,255,.75)}
+.energy-ctas{position:relative;z-index:1;display:flex;gap:12px}
+
+/* ── STATS SECTION ── */
+.stats-band{
+  background:#fff;color:#000;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  scroll-snap-align:start;
+}
+.stats-band-item{
+  padding:60px 24px;text-align:center;
+  border-right:1px solid var(--gray-200);
+  opacity:0;transform:translateY(20px);
+  transition:opacity .7s var(--ease-out), transform .7s var(--ease-out);
+}
+.stats-band-item:last-child{border-right:none}
+.stats-band-item.visible{opacity:1;transform:translateY(0)}
+.stats-band-item:nth-child(1){transition-delay:.0s}
+.stats-band-item:nth-child(2){transition-delay:.1s}
+.stats-band-item:nth-child(3){transition-delay:.2s}
+.stats-band-item:nth-child(4){transition-delay:.3s}
+.sband-val{font-size:52px;font-weight:300;letter-spacing:-.02em;line-height:1}
+.sband-unit{font-size:16px;font-weight:400;color:var(--gray-600)}
+.sband-desc{font-size:13px;color:var(--gray-600);margin-top:8px;letter-spacing:.02em;text-transform:uppercase}
+
+/* ── FEATURE ROW ── */
+.feature-row{
+  background:#fff;color:#000;
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:540px;scroll-snap-align:start;
+}
+.feature-img{overflow:hidden}
+.feature-img img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.06);
+  transition:transform 6s var(--ease-out);
+}
+.feature-img.visible img{transform:scale(1)}
+.feature-text{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:64px 56px;
+  opacity:0;transform:translateX(24px);
+  transition:opacity .9s var(--ease-out) .2s,transform .9s var(--ease-out) .2s;
+}
+.feature-text.rev{
+  order:-1;
+  transform:translateX(-24px);
+}
+.feature-text.visible{opacity:1;transform:translateX(0)!important}
+.feature-eyebrow{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gray-600);margin-bottom:16px;
+}
+.feature-text h2{font-size:clamp(28px,3vw,40px);font-weight:500;line-height:1.15;margin-bottom:16px;letter-spacing:-.01em}
+.feature-text p{font-size:15px;color:var(--gray-600);line-height:1.7;margin-bottom:24px}
+.feature-link{
+  font-size:14px;font-weight:500;color:#000;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;
+  border-bottom:1px solid #000;padding-bottom:2px;
+  transition:gap .2s;
+}
+.feature-link:hover{gap:10px}
+.feature-link::after{content:'→'}
+
+/* ── SHOP SECTION ── */
+.shop-section{
+  background:#fff;color:#000;padding:80px 48px;
+  scroll-snap-align:start;
+}
+.shop-header{text-align:center;margin-bottom:48px}
+.shop-header h2{font-size:36px;font-weight:500;letter-spacing:-.01em}
+.shop-header p{font-size:15px;color:var(--gray-600);margin-top:8px}
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.shop-card{
+  background:var(--gray-100);border-radius:12px;overflow:hidden;
+  transition:transform .3s var(--ease-out),box-shadow .3s;
+  cursor:pointer;
+}
+.shop-card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.12)}
+.shop-card-img{
+  width:100%;height:240px;overflow:hidden;
+}
+.shop-card-img img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .6s var(--ease-out);
+}
+.shop-card:hover .shop-card-img img{transform:scale(1.05)}
+.shop-card-body{padding:20px 24px 24px}
+.shop-card-body h3{font-size:17px;font-weight:500;margin-bottom:6px}
+.shop-card-body p{font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6}
+.shop-badge{
+  display:inline-block;font-size:11px;font-weight:600;
+  background:#000;color:#fff;padding:3px 10px;border-radius:3px;
+}
+
+/* ── COMPARE TABLE ── */
+.compare-section{
+  background:#fff;color:#000;padding:80px 60px;
+  scroll-snap-align:start;
+}
+.compare-section h2{font-size:34px;font-weight:500;text-align:center;margin-bottom:12px;letter-spacing:-.01em}
+.compare-section .compare-sub{text-align:center;font-size:14px;color:var(--gray-600);margin-bottom:48px}
+.compare-table{width:100%;max-width:960px;margin:0 auto;border-collapse:collapse}
+.compare-table th{
+  padding:14px 20px;font-size:13px;font-weight:600;
+  background:var(--gray-100);border-bottom:2px solid var(--gray-200);
+  text-align:left;letter-spacing:.02em;
+}
+.compare-table td{padding:13px 20px;border-bottom:1px solid var(--gray-200);font-size:14px;color:var(--gray-800)}
+.compare-table tr:hover td{background:var(--gray-100)}
+.compare-table tr:last-child td{border-bottom:none}
+.model-pill{
+  display:inline-block;background:#000;color:#fff;
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-right:4px;
+  letter-spacing:.04em;
+}
+
+/* ── FOOTER ── */
+footer{background:#000;color:#fff;padding:56px 60px 32px;scroll-snap-align:start}
+.footer-top{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:32px;
+  margin-bottom:48px;
+  padding-bottom:40px;border-bottom:1px solid #1c1c1c;
+}
+.footer-col h4{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:16px}
+.footer-col a{display:block;font-size:13px;color:#666;text-decoration:none;margin-bottom:10px;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:12px;color:#444}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{font-size:12px;color:#444;text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+/* ── PARALLAX QUOTE ── */
+.quote-section{
+  position:relative;height:520px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  scroll-snap-align:start;
+}
+.quote-bg{
+  position:absolute;inset:-60px;
+  background-size:cover;background-position:center;
+  background-attachment:fixed;
+}
+.quote-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.quote-content{position:relative;z-index:1;text-align:center;max-width:800px;padding:0 32px}
+.quote-content blockquote{
+  font-size:clamp(22px,3.5vw,38px);font-weight:300;line-height:1.4;
+  letter-spacing:-.01em;color:#fff;font-style:italic;
+}
+.quote-author{margin-top:24px;font-size:14px;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase}
+
+/* ── ANIMATION UTILS ── */
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out)}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  .nav-links{display:none}
+  .energy-split{grid-template-columns:1fr}
+  .stats-band{grid-template-columns:repeat(2,1fr)}
+  .feature-row{grid-template-columns:1fr}
+  .feature-text.rev{order:unset}
+  .shop-grid{grid-template-columns:1fr}
+  .compare-section,.shop-section,footer{padding:60px 20px}
+  nav{padding:0 16px}
+  .footer-top{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">
+    <svg viewBox="0 0 342 35" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 .1a9.7 9.7 0 007 7h11l.5.2v26.6h6.8V7.3l.6-.2h11a9.7 9.7 0 007-7H0zM155.4.1c-15.4 0-24.3 6.5-24.3 17.4s8.8 17.3 24.3 17.3 24.3-6.3 24.3-17.3S170.9.1 155.4.1zm0 28.9c-9.8 0-16.2-5.2-16.2-11.5s6.5-11.5 16.2-11.5c9.8 0 16.2 5.1 16.2 11.5s-6.5 11.5-16.2 11.5zM258.1.1h-25.4v33.9h6.9V21.1l18.5-.1a10.9 10.9 0 000-21zm-.4 15.2h-18.1V6h18.1a4.7 4.7 0 010 9.4zM211.6 6.5a9.6 9.6 0 006.9-6.4l-34.4.1v33.8h6.9V21.2h22.7l.5.3v12.5h6.9V20.6c0-3.7-3.6-5-7.2-5h-16-.4c-3.2 0-6-2.7-6-6a6 6 0 016-5.6h14.2zM315.5.1l-13.4 14.3L288.7.1H282l17.8 18.8v15h7V18.9l17.7-18.8h-8.9z"/>
+    </svg>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <a href="#">
+      <svg viewBox="0 0 342 35" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 .1a9.7 9.7 0 007 7h11l.5.2v26.6h6.8V7.3l.6-.2h11a9.7 9.7 0 007-7H0zM155.4.1c-15.4 0-24.3 6.5-24.3 17.4s8.8 17.3 24.3 17.3 24.3-6.3 24.3-17.3S170.9.1 155.4.1zm0 28.9c-9.8 0-16.2-5.2-16.2-11.5s6.5-11.5 16.2-11.5c9.8 0 16.2 5.1 16.2 11.5s-6.5 11.5-16.2 11.5zM258.1.1h-25.4v33.9h6.9V21.1l18.5-.1a10.9 10.9 0 000-21zm-.4 15.2h-18.1V6h18.1a4.7 4.7 0 010 9.4zM211.6 6.5a9.6 9.6 0 006.9-6.4l-34.4.1v33.8h6.9V21.2h22.7l.5.3v12.5h6.9V20.6c0-3.7-3.6-5-7.2-5h-16-.4c-3.2 0-6-2.7-6-6a6 6 0 016-5.6h14.2zM315.5.1l-13.4 14.3L288.7.1H282l17.8 18.8v15h7V18.9l17.7-18.8h-8.9z"/>
+      </svg>
+    </a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#hero-models">Vehicles</a></li>
+    <li><a href="#hero-model3">Model 3</a></li>
+    <li><a href="#hero-modely">Model Y</a></li>
+    <li><a href="#hero-cybertruck">Cybertruck</a></li>
+    <li><a href="#energy">Energy</a></li>
+    <li><a href="#shop">Shop</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#">Find Us</a>
+    <a href="#">Account</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO 1 — MODEL Y ═══ -->
+<section class="hero" id="hero-modely" data-index="0">
+  <div class="hero-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/learn_new_model_y_hero.jpg');background-color:#888"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-top dark-text">
+    <h1>Model Y</h1>
+    <p class="sub">Redesigned Inside and Out</p>
+    <p class="price-note">Starting at $42,990 · Est. gas savings: $5,800</p>
+  </div>
+  <div class="hero-stats dark-text">
+    <div class="stat"><div class="stat-val">320<sup></sup><span class="stat-unit"> mi</span></div><div class="stat-label">Range (EPA est.)</div></div>
+    <div class="stat"><div class="stat-val">4.1<span class="stat-unit"> s</span></div><div class="stat-label">0–60 mph</div></div>
+    <div class="stat"><div class="stat-val">456<span class="stat-unit"> hp</span></div><div class="stat-label">Peak Power</div></div>
+  </div>
+  <div class="hero-ctas">
+    <a class="btn btn-black" href="#">Order Now</a>
+    <a class="btn btn-outline-white" href="#">Learn More</a>
+  </div>
+  <div class="scroll-hint dark" onclick="document.getElementById('hero-models').scrollIntoView({behavior:'smooth'})">
+    <span>Scroll</span>
+    <div class="scroll-chevron"></div>
+  </div>
+</section>
+
+<!-- ═══ HERO 2 — MODEL S ═══ -->
+<section class="hero" id="hero-models" data-index="1">
+  <div class="hero-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-New-Social.jpg');background-color:#c0c8d4"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-top">
+    <h1>Model S</h1>
+    <p class="sub">The world's fastest accelerating sedan</p>
+    <p class="price-note">Starting at $74,990</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-val">405<span class="stat-unit"> mi</span></div><div class="stat-label">Range (EPA est.)</div></div>
+    <div class="stat"><div class="stat-val">1.99<span class="stat-unit"> s</span></div><div class="stat-label">0–60 mph</div></div>
+    <div class="stat"><div class="stat-val">1,020<span class="stat-unit"> hp</span></div><div class="stat-label">Peak Power</div></div>
+  </div>
+  <div class="hero-ctas">
+    <a class="btn btn-white" href="#">Order Now</a>
+    <a class="btn btn-dark-glass" href="#">Learn More</a>
+  </div>
+  <div class="scroll-hint" onclick="document.getElementById('hero-model3').scrollIntoView({behavior:'smooth'})">
+    <span>Scroll</span><div class="scroll-chevron"></div>
+  </div>
+</section>
+
+<!-- ═══ HERO 3 — MODEL 3 ═══ -->
+<section class="hero" id="hero-model3" data-index="2">
+  <div class="hero-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Homepage-Social-Image-Day-Hero-Cybertruck-NA-EMEA.jpg');background-position:center 30%;background-color:#9ab0c2"></div>
+  <div class="hero-overlay" style="background:linear-gradient(to bottom,rgba(0,0,0,.08),transparent 40%,transparent 55%,rgba(0,0,0,.3))"></div>
+  <div class="hero-top">
+    <h1>Model 3</h1>
+    <p class="sub">World's best-selling electric car</p>
+    <p class="price-note">Starting at $38,990</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-val">358<span class="stat-unit"> mi</span></div><div class="stat-label">Range (EPA est.)</div></div>
+    <div class="stat"><div class="stat-val">3.1<span class="stat-unit"> s</span></div><div class="stat-label">0–60 mph</div></div>
+    <div class="stat"><div class="stat-val">346<span class="stat-unit"> hp</span></div><div class="stat-label">Peak Power</div></div>
+  </div>
+  <div class="hero-ctas">
+    <a class="btn btn-white" href="#">Order Now</a>
+    <a class="btn btn-dark-glass" href="#">Learn More</a>
+  </div>
+  <div class="scroll-hint" onclick="document.getElementById('hero-cybertruck').scrollIntoView({behavior:'smooth'})">
+    <span>Scroll</span><div class="scroll-chevron"></div>
+  </div>
+</section>
+
+<!-- ═══ HERO 4 — CYBERTRUCK ═══ -->
+<section class="hero" id="hero-cybertruck" data-index="3" style="background:#0a0a0a">
+  <div class="hero-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Mega-Menu-Vehicles-Cybertruck.png');background-size:contain;background-repeat:no-repeat;background-position:center 60%;background-color:#0a0a0a;transform:none"></div>
+  <div class="hero-top">
+    <h1 style="background:linear-gradient(135deg,#e0e0e0,#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Cybertruck</h1>
+    <p class="sub">Engineered for the impossible</p>
+    <p class="price-note">Starting at $60,990 · Tri Motor Available</p>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-val">320<span class="stat-unit"> mi</span></div><div class="stat-label">Range (EPA est.)</div></div>
+    <div class="stat"><div class="stat-val">2.6<span class="stat-unit"> s</span></div><div class="stat-label">0–60 mph</div></div>
+    <div class="stat"><div class="stat-val">845<span class="stat-unit"> hp</span></div><div class="stat-label">Peak Power</div></div>
+  </div>
+  <div class="hero-ctas">
+    <a class="btn btn-white" href="#">Order Now</a>
+    <a class="btn btn-glass-light" href="#">Learn More</a>
+  </div>
+  <div class="scroll-hint" onclick="document.getElementById('stats-band').scrollIntoView({behavior:'smooth'})">
+    <span>Scroll</span><div class="scroll-chevron"></div>
+  </div>
+</section>
+
+<!-- ═══ STATS BAND ═══ -->
+<div class="stats-band" id="stats-band">
+  <div class="stats-band-item">
+    <div class="sband-val">405<span class="sband-unit"> mi</span></div>
+    <div class="sband-desc">Longest range available</div>
+  </div>
+  <div class="stats-band-item">
+    <div class="sband-val">1.99<span class="sband-unit"> s</span></div>
+    <div class="sband-desc">Quickest 0–60 mph</div>
+  </div>
+  <div class="stats-band-item">
+    <div class="sband-val">200<span class="sband-unit"> mph</span></div>
+    <div class="sband-desc">Top speed</div>
+  </div>
+  <div class="stats-band-item">
+    <div class="sband-val">1,020<span class="sband-unit"> hp</span></div>
+    <div class="sband-desc">Peak power</div>
+  </div>
+</div>
+
+<!-- ═══ FEATURE ROW 1 — NEW MODEL Y EXTERIOR ═══ -->
+<div class="feature-row" id="feature1">
+  <div class="feature-img" id="fi1">
+    <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/learn_new_modely_ext_1.jpg" alt="New Model Y Exterior" loading="lazy"/>
+  </div>
+  <div class="feature-text" id="ft1">
+    <p class="feature-eyebrow">New Model Y · 2025</p>
+    <h2>Redesigned for a new era</h2>
+    <p>A lower nose and bold full-width lightbar draw inspiration from Cybertruck. New aerodynamic ducts, extended rear diffuser and 19-inch Crossflow wheels maximize efficiency and give the vehicle a more planted stance.</p>
+    <a class="feature-link" href="#">Explore exterior</a>
+  </div>
+</div>
+
+<!-- ═══ FEATURE ROW 2 — NEW MODEL Y INTERIOR ═══ -->
+<div class="feature-row" id="feature2">
+  <div class="feature-text rev" id="ft2">
+    <p class="feature-eyebrow">New Model Y · Premium Interior</p>
+    <h2>A calm, refined cabin experience</h2>
+    <p>Wraparound multicolor ambient lighting, genuine aluminum accents, and an 8-inch rear touchscreen redefine comfort. Road noise is reduced by 22%. New powered reclining rear seats fold flat at record speed.</p>
+    <a class="feature-link" href="#">Explore interior</a>
+  </div>
+  <div class="feature-img" id="fi2">
+    <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/learn_new_modely_int2.jpg" alt="New Model Y Interior" loading="lazy"/>
+  </div>
+</div>
+
+<!-- ═══ FEATURE ROW 3 — MODEL S SPECS ═══ -->
+<div class="feature-row" id="feature3">
+  <div class="feature-img" id="fi3">
+    <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-New-Specs-Plaid-Desktop-Imperial.png" alt="Model S Plaid" loading="lazy" style="object-fit:contain;background:#f5f5f5"/>
+  </div>
+  <div class="feature-text" id="ft3">
+    <p class="feature-eyebrow">Model S Plaid</p>
+    <h2>Beyond ludicrous. Beyond all limits.</h2>
+    <p>Three independent motors, 1,020 horsepower and a 0–60 time of just 1.99 seconds with rollout. With a quarter-mile in 9.23 seconds, Model S Plaid is the fastest production sedan ever built.</p>
+    <a class="feature-link" href="#">Order Model S</a>
+  </div>
+</div>
+
+<!-- ═══ QUOTE / PARALLAX ═══ -->
+<div class="quote-section">
+  <div class="quote-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/learn_new_modely_ext_2.jpg')"></div>
+  <div class="quote-overlay"></div>
+  <div class="quote-content fade-up" id="quote">
+    <blockquote>"The mission of Tesla is to accelerate the world's transition to sustainable energy."</blockquote>
+    <p class="quote-author">Tesla, Inc.</p>
+  </div>
+</div>
+
+<!-- ═══ ENERGY SPLIT ═══ -->
+<div class="energy-split" id="energy">
+  <div class="energy-panel" id="ep-solar">
+    <div class="energy-panel-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Homepage-Social-Image-Day-Hero-Cybertruck-NA-EMEA.jpg');background-position:left center;background-color:#a8b89a"></div>
+    <div class="energy-panel-overlay"></div>
+    <div class="energy-panel-info fade-up" id="solar-info">
+      <h2>Solar Panels</h2>
+      <p>Lowest cost solar in America</p>
+    </div>
+    <div class="energy-ctas">
+      <a class="btn btn-white" href="#">Order Now</a>
+      <a class="btn btn-dark-glass" href="#">Learn More</a>
+    </div>
+  </div>
+  <div class="energy-panel" id="ep-powerwall">
+    <div class="energy-panel-bg" style="background-image:url('https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-New-Social.jpg');background-position:right center;background-color:#b0c0d4"></div>
+    <div class="energy-panel-overlay"></div>
+    <div class="energy-panel-info fade-up" id="pw-info">
+      <h2>Powerwall 3</h2>
+      <p>24/7 home energy security</p>
+    </div>
+    <div class="energy-ctas">
+      <a class="btn btn-white" href="#">Order Now</a>
+      <a class="btn btn-dark-glass" href="#">Learn More</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOP ═══ -->
+<div class="shop-section" id="shop">
+  <div class="shop-header fade-up" id="shop-header">
+    <h2>Tesla Shop</h2>
+    <p>Accessories and charging solutions designed for your Tesla</p>
+  </div>
+  <div class="shop-grid">
+    <div class="shop-card fade-up" id="sc1">
+      <div class="shop-card-img">
+        <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/support-tesla-app-hero.jpg" alt="Wall Connector" loading="lazy"/>
+      </div>
+      <div class="shop-card-body">
+        <h3>Gen 3 Wall Connector</h3>
+        <p>Up to 44 miles of range per hour. The fastest home charging solution for every Tesla vehicle.</p>
+        <span class="shop-badge">From $350</span>
+      </div>
+    </div>
+    <div class="shop-card fade-up" id="sc2" style="transition-delay:.1s">
+      <div class="shop-card-img">
+        <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/learn_new_modely_int3.jpg" alt="Model Y Interior Accessories" loading="lazy"/>
+      </div>
+      <div class="shop-card-body">
+        <h3>All-Weather Floor Mats</h3>
+        <p>Precision-fit mats engineered for Model Y. Protect against dirt, mud and moisture year-round.</p>
+        <span class="shop-badge">From $155</span>
+      </div>
+    </div>
+    <div class="shop-card fade-up" id="sc3" style="transition-delay:.2s">
+      <div class="shop-card-img">
+        <img src="https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-New-Specs-LR-AWD-Desktop-Imperial.png" alt="Model S Accessories" loading="lazy" style="object-fit:contain;background:#f0f0f0"/>
+      </div>
+      <div class="shop-card-body">
+        <h3>Aero Wheel Cover Kit</h3>
+        <p>Improve efficiency and achieve a sleeker look with aerodynamic 19-inch wheel covers.</p>
+        <span class="shop-badge">From $50</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPARE TABLE ═══ -->
+<div class="compare-section" id="compare">
+  <h2 class="fade-up" id="compare-h">Compare All Models</h2>
+  <p class="compare-sub fade-up" id="compare-sub">Find the right Tesla for you</p>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Specification</th>
+        <th><span class="model-pill">S</span> Model S</th>
+        <th><span class="model-pill">3</span> Model 3</th>
+        <th><span class="model-pill">X</span> Model X</th>
+        <th><span class="model-pill">Y</span> Model Y</th>
+        <th><span class="model-pill">CT</span> Cybertruck</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Range (mi)</td><td>405</td><td>358</td><td>335</td><td>320</td><td>320</td></tr>
+      <tr><td>0–60 mph</td><td>1.99 s</td><td>3.1 s</td><td>2.5 s</td><td>4.1 s</td><td>2.6 s</td></tr>
+      <tr><td>Top Speed</td><td>200 mph</td><td>162 mph</td><td>163 mph</td><td>135 mph</td><td>130 mph</td></tr>
+      <tr><td>Peak Power</td><td>1,020 hp</td><td>346 hp</td><td>1,020 hp</td><td>456 hp</td><td>845 hp</td></tr>
+      <tr><td>Seating</td><td>5</td><td>5</td><td>5–7</td><td>5–7</td><td>5</td></tr>
+      <tr><td>Cargo (cu ft)</td><td>28</td><td>23</td><td>88</td><td>76</td><td>121</td></tr>
+      <tr><td>Starting Price</td><td>$74,990</td><td>$38,990</td><td>$79,990</td><td>$42,990</td><td>$60,990</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-col">
+      <h4>Tesla</h4>
+      <a href="#">About</a><a href="#">Careers</a><a href="#">Investor Relations</a>
+      <a href="#">Press</a><a href="#">Blog</a><a href="#">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Vehicles</h4>
+      <a href="#">Model S</a><a href="#">Model 3</a><a href="#">Model X</a>
+      <a href="#">Model Y</a><a href="#">Cybertruck</a><a href="#">Semi</a><a href="#">Roadster</a>
+    </div>
+    <div class="footer-col">
+      <h4>Energy</h4>
+      <a href="#">Solar Panels</a><a href="#">Solar Roof</a><a href="#">Powerwall</a>
+      <a href="#">Megapack</a><a href="#">Commercial Energy</a>
+    </div>
+    <div class="footer-col">
+      <h4>Charging</h4>
+      <a href="#">Charging Overview</a><a href="#">Supercharger</a>
+      <a href="#">Wall Connector</a><a href="#">Home Charging</a><a href="#">Destination Charging</a>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="#">Find Us</a><a href="#">Schedule Service</a>
+      <a href="#">Customer Support</a><a href="#">Safety</a>
+      <a href="#">Roadside Assistance</a><a href="#">Community</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Tesla © 2025 · All Rights Reserved</p>
+    <div class="footer-links">
+      <a href="#">Privacy &amp; Legal</a>
+      <a href="#">Privacy Settings</a>
+      <a href="#">Contact</a>
+      <a href="#">News</a>
+      <a href="#">Get Updates</a>
+      <a href="#">Locations</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 900);
+});
+
+// ── NAV SCROLL ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
+
+// ── HERO ANIMATION ON INTERSECTION ──
+const heroSections = document.querySelectorAll('.hero');
+const heroObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('active');
+    }
+  });
+}, {threshold: 0.35});
+heroSections.forEach(h => heroObserver.observe(h));
+
+// Trigger first hero immediately
+setTimeout(() => {
+  document.querySelector('.hero').classList.add('active');
+}, 950);
+
+// ── ENERGY PANELS ──
+const energyPanels = document.querySelectorAll('.energy-panel');
+const epObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('active');
+  });
+}, {threshold:0.3});
+energyPanels.forEach(p => epObserver.observe(p));
+
+// ── STATS BAND ──
+const statItems = document.querySelectorAll('.stats-band-item');
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, {threshold:0.4});
+statItems.forEach(s => statObserver.observe(s));
+
+// ── FEATURE ROWS ──
+const featureImages = document.querySelectorAll('.feature-img');
+const featureTexts = document.querySelectorAll('.feature-text');
+const featureObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, {threshold:0.25});
+featureImages.forEach(fi => featureObserver.observe(fi));
+featureTexts.forEach(ft => featureObserver.observe(ft));
+
+// ── GENERIC FADE-UP ──
+const fadeUps = document.querySelectorAll('.fade-up');
+const fuObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, {threshold:0.2});
+fadeUps.forEach(el => fuObserver.observe(el));
+
+// ── ANIMATED NUMBER COUNTER ──
+function animateCounter(el, target, suffix='', duration=1600) {
+  let start = 0;
+  const step = (timestamp) => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = eased * target;
+    el.textContent = (target % 1 !== 0 ? current.toFixed(2) : Math.floor(current).toLocaleString()) + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const sband = document.querySelector('.stats-band');
+let sbCounted = false;
+const sbObserver = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting && !sbCounted) {
+    sbCounted = true;
+    const vals = sband.querySelectorAll('.sband-val');
+    animateCounter(vals[0].childNodes[0], 405, '', 1800);
+    animateCounter(vals[1].childNodes[0], 1.99, '', 1800);
+    animateCounter(vals[2].childNodes[0], 200, '', 1800);
+    animateCounter(vals[3].childNodes[0], 1020, '', 1800);
+  }
+}, {threshold:0.5});
+sbObserver.observe(sband);
+</script>
+</body>
+</html>
